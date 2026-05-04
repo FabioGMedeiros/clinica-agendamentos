@@ -37,6 +37,15 @@ Usei `PATCH /appointments/{id}/cancel` em vez de `PUT` ou `DELETE` porque o canc
 
 ---
 
+## O que foi além dos requisitos
+
+- **Endpoint de conclusão de agendamento (`PATCH /appointments/{id}/complete`):** a especificação previa apenas o cancelamento como transição de estado. Adicionei a conclusão como uma segunda transição controlada, com validação de que apenas agendamentos com status `AGENDADO` podem ser concluídos, cobertura de testes unitários e botão dedicado na interface Angular (desabilitado automaticamente quando o status não permite a ação).
+
+### Validação de horário para conclusão
+Só é permitido concluir um agendamento após o horário marcado (`dateTime <= now`). Considerei adicionar uma tolerância fixa de N minutos, mas descartei por ser um valor arbitrário sem base no domínio. A regra `dateTime <= now` é semanticamente correta: uma consulta só pode ser registrada como concluída depois que ela deveria ter ocorrido.
+
+---
+
 ## O que ficou de fora
 
 - **Autenticação/autorização (JWT):** fora do escopo do teste, mas seria o próximo passo natural com Spring Security
