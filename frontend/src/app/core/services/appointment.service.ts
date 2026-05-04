@@ -30,4 +30,8 @@ export class AppointmentService {
   cancel(id: number, data: CancelAppointmentRequest): Observable<Appointment> {
     return this.http.patch<Appointment>(`${this.url}/${id}/cancel`, data);
   }
+
+  complete(id: number): Observable<Appointment> {
+    return this.http.patch<Appointment>(`${this.url}/${id}/complete`, {});
+  }
 }

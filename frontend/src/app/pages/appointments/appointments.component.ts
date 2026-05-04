@@ -103,8 +103,14 @@ import { CancelDialogComponent } from './cancel-dialog.component';
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Ações</th>
             <td mat-cell *matCellDef="let a">
+              <button mat-icon-button color="primary"
+                [disabled]="a.status !== 'AGENDADO'"
+                (click)="complete(a)"
+                title="Concluir agendamento">
+                <mat-icon>check_circle</mat-icon>
+              </button>
               <button mat-icon-button color="warn"
-                [disabled]="a.status === 'CANCELADO'"
+                [disabled]="a.status !== 'AGENDADO'"
                 (click)="openCancelDialog(a)"
                 title="Cancelar agendamento">
                 <mat-icon>cancel</mat-icon>
@@ -170,6 +176,18 @@ export class AppointmentsComponent implements OnInit {
   clearFilters() {
     this.filterForm.reset();
     this.load();
+  }
+
+  complete(appointment: Appointment) {
+    this.appointmentService.complete(appointment.id).subscribe({
+      next: () => {
+        this.snack.open('Agendamento concluído.', 'OK', { duration: 3000 });
+        this.load();
+      },
+      error: (err) => {
+        this.snack.open(err.error?.message || 'Erro ao concluir agendamento.', 'OK', { duration: 4000 });
+      }
+    });
   }
 
   openCancelDialog(appointment: Appointment) {
