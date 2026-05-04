@@ -88,7 +88,7 @@ import { CancelDialogComponent } from './cancel-dialog.component';
           </ng-container>
           <ng-container matColumnDef="dateTime">
             <th mat-header-cell *matHeaderCellDef>Data/Hora</th>
-            <td mat-cell *matCellDef="let a">{{ a.dateTime | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td mat-cell *matCellDef="let a">{{ a.dateTime + 'Z' | date:'dd/MM/yyyy HH:mm':'UTC' }}</td>
           </ng-container>
           <ng-container matColumnDef="type">
             <th mat-header-cell *matHeaderCellDef>Tipo</th>
