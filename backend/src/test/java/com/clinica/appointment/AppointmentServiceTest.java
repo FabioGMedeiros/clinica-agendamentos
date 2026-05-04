@@ -147,4 +147,56 @@ class AppointmentServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("já está cancelado");
     }
+
+    @Test
+    @DisplayName("Deve concluir agendamento com sucesso")
+    void shouldCompleteAppointmentSuccessfully() {
+        Appointment appointment = Appointment.builder()
+                .id(1L).patient(patient).professional(professional)
+                .dateTime(LocalDateTime.now().minusMinutes(30))
+                .type(AppointmentType.CONSULTA)
+                .status(AppointmentStatus.AGENDADO)
+                .build();
+
+        when(appointmentRepository.findById(1L)).thenReturn(java.util.Optional.of(appointment));
+        when(appointmentRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        AppointmentDTO.Response response = appointmentService.complete(1L);
+
+        assertThat(response.status()).isEqualTo(AppointmentStatus.CONCLUIDO);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao concluir agendamento que não está agendado")
+    void shouldThrowWhenCompletingNonScheduledAppointment() {
+        Appointment appointment = Appointment.builder()
+                .id(1L).patient(patient).professional(professional)
+                .dateTime(LocalDateTime.now().minusMinutes(30))
+                .type(AppointmentType.CONSULTA)
+                .status(AppointmentStatus.CANCELADO)
+                .build();
+
+        when(appointmentRepository.findById(1L)).thenReturn(java.util.Optional.of(appointment));
+
+        assertThatThrownBy(() -> appointmentService.complete(1L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("AGENDADO");
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao concluir agendamento cujo horário ainda não chegou")
+    void shouldThrowWhenCompletingFutureAppointment() {
+        Appointment appointment = Appointment.builder()
+                .id(1L).patient(patient).professional(professional)
+                .dateTime(LocalDateTime.now().plusDays(1))
+                .type(AppointmentType.CONSULTA)
+                .status(AppointmentStatus.AGENDADO)
+                .build();
+
+        when(appointmentRepository.findById(1L)).thenReturn(java.util.Optional.of(appointment));
+
+        assertThatThrownBy(() -> appointmentService.complete(1L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("após o horário marcado");
+    }
 }

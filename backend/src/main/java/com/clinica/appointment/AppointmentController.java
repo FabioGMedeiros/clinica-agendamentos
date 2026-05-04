@@ -48,4 +48,10 @@ public class AppointmentController {
     ) {
         return ResponseEntity.ok(appointmentService.cancel(id, request));
     }
+
+    @PatchMapping("/{id}/complete")
+    @Operation(summary = "Concluir um agendamento")
+    public ResponseEntity<AppointmentDTO.Response> complete(@PathVariable Long id) {
+        return ResponseEntity.ok(appointmentService.complete(id));
+    }
 }

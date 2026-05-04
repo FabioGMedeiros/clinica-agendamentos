@@ -66,13 +66,30 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Agendamento não encontrado com id: " + id));
 
-        // Regra: só cancela se não estiver já cancelado
         if (appointment.getStatus() == AppointmentStatus.CANCELADO) {
             throw new BusinessException("O agendamento já está cancelado.");
         }
 
         appointment.setStatus(AppointmentStatus.CANCELADO);
         appointment.setCancelReason(request.reason());
+
+        return AppointmentDTO.Response.from(appointmentRepository.save(appointment));
+    }
+
+    @Transactional
+    public AppointmentDTO.Response complete(Long id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Agendamento não encontrado com id: " + id));
+
+        if (appointment.getStatus() != AppointmentStatus.AGENDADO) {
+            throw new BusinessException("Apenas agendamentos com status AGENDADO podem ser concluídos.");
+        }
+
+        if (appointment.getDateTime().isAfter(LocalDateTime.now())) {
+            throw new BusinessException("O agendamento só pode ser concluído após o horário marcado.");
+        }
+
+        appointment.setStatus(AppointmentStatus.CONCLUIDO);
 
         return AppointmentDTO.Response.from(appointmentRepository.save(appointment));
     }
